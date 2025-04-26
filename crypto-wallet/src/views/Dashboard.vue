@@ -76,7 +76,6 @@
   </div>
 </template>
 
-
 <script>
 import axios from 'axios'
 import { mapGetters } from 'vuex'
@@ -106,12 +105,17 @@ export default {
       }
 
       try {
+        
+        const { data: priceData } = await axios.get(`https://criptoya.com/api/satoshitango/${this.crypto}/ars`)
+        const rate = this.action === 'compra' ? priceData.totalAsk : priceData.totalBid
+        const totalEnArs = this.amount * rate
+
         const data = {
           user_id: this.getUserId,
           action: this.action,
           crypto_code: this.crypto,
           crypto_amount: this.amount,
-          money: this.calculateMoney(),
+          money: totalEnArs,
           datetime: new Date().toISOString()
         }
 
@@ -119,24 +123,19 @@ export default {
           'https://laboratorio3-f36a.restdb.io/rest/transactions',
           data,
           {
-            headers: { 'x-apikey': '60eb09146661365596af552f' }
+            headers: {
+              'x-apikey': '60eb09146661365596af552f',
+              'Content-Type': 'application/json'
+            }
           }
         )
 
         this.message = 'Operación registrada con éxito.'
         this.resetForm()
       } catch (error) {
-        this.errorMessage = 'Hubo un error al registrar la operación.'
         console.error(error)
+        this.errorMessage = 'Hubo un error al registrar la operación.'
       }
-    },
-    calculateMoney() {
-      const rates = {
-        btc: 62000000,
-        eth: 4000000,
-        usdt: 1000
-      }
-      return this.amount * (rates[this.crypto] || 1)
     },
     resetForm() {
       this.action = 'compra'
