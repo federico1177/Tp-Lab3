@@ -66,7 +66,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getUserId']) // OJO: getUserId es una propiedad computada
+    ...mapGetters(['getUserId']) 
   },
   methods: {
     async submitForm() {
@@ -88,7 +88,7 @@ export default {
         const totalEnArs = this.amount * rate
 
         const transactionData = {
-          user_id: this.getUserId,  // ← CORREGIDO: sin paréntesis
+          user_id: this.getUserId,  
           action: this.action,
           crypto_code: this.crypto,
           crypto_amount: this.amount,
