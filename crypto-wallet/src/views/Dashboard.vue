@@ -3,7 +3,6 @@
     <div class="cont2">
       <h2 class="cont3">Panel de Usuario</h2>
       <div class="cont4">
-        <router-link to="/history" class="verhist">Ver historial</router-link>
         <button @click="reiniciarFormulario" class="newoper">Nueva operación</button>
       </div>
     </div>
