@@ -12,14 +12,14 @@
       <div>
         <label for="action" class="accioncri">Acción:</label>
         <select v-model="action" id="action" required class="opcciones">
-          <option value="compra">Compra</option>
-          <option value="venta">Venta</option>
+          <option value="purchase">Compra</option>
+          <option value="sale">Venta</option>
         </select>
       </div>
 
       <div>
         <label for="crypto" class="cryp">Criptomoneda:</label>
-        <select v-model="crypto" id="crypto" required class="opcciones">
+        <select v-model="crypto" id="crypto" required class="opcciones" @change="updateCryptoPrice">
           <option disabled value="">Selecciona una opción</option>
           <option value="btc">Bitcoin (BTC)</option>
           <option value="eth">Ethereum (ETH)</option>
@@ -36,6 +36,32 @@
           required
           min="0.0001"
           step="any"
+          class="cant1"
+          :disabled="true"
+        />
+      </div>
+
+      <div>
+        <label for="money" class="cantidad">Monto en ARS:</label>
+        <input
+          type="number"
+          v-model.number="money"
+          id="money"
+          required
+          min="0.01"
+          step="any"
+          class="cant1"
+          @input="calculateAmountFromMoney"
+        />
+      </div>
+
+      <div>
+        <label for="datetime" class="cantidad">Fecha y Hora:</label>
+        <input
+          type="datetime-local"
+          v-model="datetime"
+          id="datetime"
+          required
           class="cant1"
         />
       </div>
@@ -57,45 +83,71 @@ export default {
   name: 'UserDashboard',
   data() {
     return {
-      action: 'compra',
+      action: 'purchase', 
       crypto: '',
-      amount: null,
+      amount: null, 
+      money: null,   
+      price: null,   
+      datetime: '',  
       message: '',
       errorMessage: '',
       loading: false
     }
   },
   computed: {
-    ...mapGetters(['getUserId']) 
+    ...mapGetters(['getUserId'])
   },
   methods: {
+    async updateCryptoPrice() {
+      if (!this.crypto) return;
+
+      try {
+        const { data: priceData } = await axios.get(
+          `https://criptoya.com/api/satoshitango/${this.crypto}/ars`
+        );
+        this.price = this.action === 'purchase' ? priceData.totalAsk : priceData.totalBid;
+        this.calculateAmountFromMoney(); 
+      } catch (error) {
+        console.error(error);
+        this.price = null;
+      }
+    },
+
+    calculateAmountFromMoney() {
+      if (this.price && this.money > 0) {
+        this.amount = this.money / this.price;
+      } else {
+        this.amount = null;
+      }
+    },
+
     async submitForm() {
       this.message = ''
       this.errorMessage = ''
       this.loading = true
 
-      if (!this.crypto || !this.amount) {
-        this.errorMessage = 'Todos los campos son obligatorios.'
+      
+      if (!this.crypto || !this.amount || !this.money || !this.datetime) {
+        this.errorMessage = 'Todos los campos son obligatorios y deben ser validos.'
         this.loading = false
         return
       }
 
+    
+      const formattedDatetime = new Date(this.datetime).toLocaleString('en-GB', {
+        timeZone: 'UTC'
+      }).replace(',', '').replace('/', '-').replace('/', '-');
+
+      const transactionData = {
+        user_id: this.getUserId,  
+        action: this.action,
+        crypto_code: this.crypto,
+        crypto_amount: this.amount,
+        money: this.money,
+        datetime: formattedDatetime
+      }
+
       try {
-        const { data: priceData } = await axios.get(
-          `https://criptoya.com/api/satoshitango/${this.crypto}/ars`
-        )
-        const rate = this.action === 'compra' ? priceData.totalAsk : priceData.totalBid
-        const totalEnArs = this.amount * rate
-
-        const transactionData = {
-          user_id: this.getUserId,  
-          action: this.action,
-          crypto_code: this.crypto,
-          crypto_amount: this.amount,
-          money: totalEnArs,
-          datetime: new Date().toISOString()
-        }
-
         await axios.post(
           'https://laboratorio3-f36a.restdb.io/rest/transactions',
           transactionData,
@@ -116,14 +168,19 @@ export default {
         this.loading = false
       }
     },
+
     resetForm() {
-      this.action = 'compra'
+      this.action = 'purchase'
       this.crypto = ''
       this.amount = null
+      this.money = null
+      this.datetime = ''
     }
   }
 }
 </script>
+
+
 
 <style scoped>
 .cont1 {
@@ -241,6 +298,13 @@ export default {
 .procesando {
   margin-top: 1rem;
   color: #3b82f6;
+  font-weight: 500;
+}
+
+.total-ars {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #4ade80; 
   font-weight: 500;
 }
 </style>

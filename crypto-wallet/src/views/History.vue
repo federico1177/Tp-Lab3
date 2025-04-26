@@ -10,7 +10,6 @@
         <thead>
           <tr class="fila">
             <th class="dato">Fecha</th>
-            <th class="dato">Acción</th>
             <th class="dato">Cripto</th>
             <th class="dato">Cantidad</th>
             <th class="dato">Monto en ARS</th>
@@ -20,7 +19,6 @@
         <tbody>
           <tr v-for="tx in transactions" :key="tx._id">
             <td class="dato">{{ formatDate(tx.datetime) }}</td>
-            <td class="dato">{{ tx.action }}</td>
             <td class="dato">{{ tx.crypto_code }}</td>
             <td class="dato">{{ tx.crypto_amount }}</td>
             <td class="dato">{{ formatCurrency(tx.money) }}</td>
@@ -162,7 +160,6 @@ export default {
   text-align: center;
   margin-top: 1rem;
 }
-
 
 .edit-btn {
   background-color: #f59e0b;
