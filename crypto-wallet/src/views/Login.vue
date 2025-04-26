@@ -32,26 +32,26 @@ export default {
   setup() {
     const store = useStore()
     const router = useRouter()
-    const idUsuario = ref('')  // Reemplazamos userId por idUsuario
-    const mensajeError = ref('')  // Reemplazamos errorMessage por mensajeError
+    const idUsuario = ref('')  
+    const mensajeError = ref('')  
 
     const iniciarSesion = () => {
-      mensajeError.value = ''  // Limpiamos el mensaje de error
+      mensajeError.value = ''  
 
       if (!idUsuario.value.trim()) {
         mensajeError.value = 'Por favor, ingresá un ID válido.'
         return
       }
 
-      const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/  // Verificamos que el ID tenga letra y número
+      const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/  
 
       if (!regex.test(idUsuario.value)) {
         mensajeError.value = 'El ID debe contener al menos una letra y un número.'
         return
       }
 
-      store.commit('setUserId', idUsuario.value)  // Establecemos el ID de usuario en el estado global
-      router.push('/dashboard')  // Redirigimos al dashboard
+      store.commit('setUserId', idUsuario.value)  
+      router.push('/dashboard')  
     }
 
     return {
