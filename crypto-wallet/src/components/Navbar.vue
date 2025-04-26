@@ -1,10 +1,10 @@
 <template>
-  <nav class="bg-gray-800 text-white p-4 flex justify-between items-center">
-    <div class="text-xl font-bold">CryptoPanel</div>
-    <div class="space-x-4">
-      <router-link to="/dashboard" class="hover:underline">Dashboard</router-link>
-      <router-link to="/history" class="hover:underline">Historial</router-link>
-      <router-link to="/" class="hover:underline">Cerrar sesión</router-link>
+  <nav class="cont1">
+    <div class="logo">CryptoPanel</div>
+    <div class="botons">
+      <router-link to="/dashboard" class="boton">Dashboard</router-link>
+      <router-link to="/history" class="boton">Historial</router-link>
+      <router-link to="/" class="boton">Cerrar sesión</router-link>
     </div>
   </nav>
 </template>
@@ -14,15 +14,35 @@ export default {
   name: 'AppNavbar'
 }
 </script>
-
 <style scoped>
-
-.bg-primary {
+.cont1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #2C3E50;
+  padding: 1rem 2rem;
+  color: white;
 }
 
-.text-accent {
-  color: #3498db; 
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
+.botons {
+  display: flex;
+  gap: 1rem;
+}
+
+.boton {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.3s ease;
+}
+
+.boton:hover {
+  background-color: #34495e;
+}
 </style>

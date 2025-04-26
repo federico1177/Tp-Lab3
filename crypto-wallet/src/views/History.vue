@@ -1,41 +1,44 @@
 <template>
-  <div class="p-4 max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold mb-4">Historial de movimientos</h2>
+  <div class="cont1">
+    <h2 class="titulo">Historial de movimientos</h2>
 
-    <div v-if="loading" class="text-gray-600">Cargando...</div>
-    <div v-else-if="transactions.length === 0" class="text-gray-500">No hay movimientos registrados.</div>
+    <div v-if="loading">Cargando...</div>
+    <div v-else-if="transactions.length === 0">No hay movimientos registrados.</div>
 
-    <table v-else class="w-full table-auto border border-collapse mt-2">
-      <thead>
-        <tr class="bg-gray-200">
-          <th class="border p-2">Fecha</th>
-          <th class="border p-2">Acción</th>
-          <th class="border p-2">Cripto</th>
-          <th class="border p-2">Cantidad</th>
-          <th class="border p-2">Monto en ARS</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="tx in transactions" :key="tx._id">
-          <td class="border p-2">{{ formatDate(tx.datetime) }}</td>
-          <td class="border p-2 capitalize">{{ tx.action }}</td>
-          <td class="border p-2 uppercase">{{ tx.crypto_code }}</td>
-          <td class="border p-2">{{ tx.crypto_amount }}</td>
-          <td class="border p-2">{{ formatCurrency(tx.money) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="cont2">
+      <table class="tablahist">
+        <thead>
+          <tr class="fila">
+            <th class="dato">Fecha</th>
+            <th class="dato">Acción</th>
+            <th class="dato">Cripto</th>
+            <th class="dato">Cantidad</th>
+            <th class="dato">Monto en ARS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="tx in transactions" :key="tx._id">
+            <td class="dato">{{ formatDate(tx.datetime) }}</td>
+            <td class="dato">{{ tx.action }}</td>
+            <td class="dato">{{ tx.crypto_code }}</td>
+            <td class="dato">{{ tx.crypto_amount }}</td>
+            <td class="dato">{{ formatCurrency(tx.money) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
+    <p v-if="errorMessage" class="meserror">{{ errorMessage }}</p>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios'
 import { mapGetters } from 'vuex'
 
 export default {
-   name: 'TransactionHistory',
+  name: 'TransactionHistory',
   data() {
     return {
       transactions: [],
@@ -78,7 +81,41 @@ export default {
 </script>
 
 <style scoped>
-table {
-  border: 1px solid #ccc;
+.cont1 {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cont2 {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+
+.titulo {
+  color: #1F2937;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.tablahist {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fila {
+  background-color: #f3f4f6;
+}
+
+.dato {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  text-align: center;
+}
+
+.meserror {
+  color: #EF4444;
+  text-align: center;
+  margin-top: 1rem;
 }
 </style>

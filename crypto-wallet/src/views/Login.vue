@@ -1,16 +1,16 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-screen bg-gray-100">
-    <div class="bg-white p-6 rounded-2xl shadow-md w-96">
-      <h1 class="text-2xl font-bold mb-4 text-center">Iniciar Sesión</h1>
+  <div class="cont1">
+    <div class="cont2">
+      <h1 class="btinicio">Iniciar Sesión</h1>
       <input
         v-model="userId"
         type="text"
         placeholder="Ingresa tu ID"
-        class="w-full p-2 border border-gray-300 rounded mb-4"
+        class="usuario"
       />
       <button
         @click="login"
-        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        class="btiniciar"
       >
         Entrar
       </button>
@@ -18,34 +18,37 @@
   </div>
 </template>
 
+
 <script>
-import { ref } from 'vue' // Asegurándose de importar ref desde 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
 export default {
-  name: 'UserLogin', // Nombre del componente siguiendo las buenas prácticas
-
+  name: 'UserLogin',
   setup() {
-    const store = useStore() // Usando Vuex
-    const router = useRouter() // Usando Vue Router
-    const userId = ref('') // Definir 'userId' como ref para la reactividad
+    const store = useStore()
+    const router = useRouter()
+    const userId = ref('')
 
-    // Método para realizar el login
     const login = () => {
       if (!userId.value.trim()) {
         alert('Por favor, ingresá un ID válido.')
         return
       }
 
-      // Guardar el userId en el store
-      store.commit('setUserId', userId.value)
+       const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/;
 
-      // Redirigir al Dashboard
+        if (!regex.test(this.username)) {
+          
+        this.errorMessage = "El ID debe contener al menos una letra y un número.";
+        return;
+      }
+
+      store.commit('setUserId', userId.value)
       router.push('/dashboard')
     }
 
-    // Retornar las propiedades y métodos para que estén disponibles en el template
     return {
       userId,
       login
@@ -55,5 +58,51 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos adicionales para mejorar la apariencia si lo necesitas */
+.cont1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9fafb;
+}
+
+.cont2 {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btinicio {
+  font-size: 1.5rem;
+  text-align: center;
+  color: #1f2937;
+}
+
+.usuario {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.btiniciar {
+  padding: 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btiniciar:hover {
+  background-color: #1e40af;
+}
 </style>

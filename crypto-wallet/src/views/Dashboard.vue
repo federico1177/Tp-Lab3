@@ -1,35 +1,34 @@
 <template>
-  <div class="p-4 max-w-xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold">Panel de Usuario</h2>
-      <div class="space-x-2">
+  <div class="cont1">
+    <div class="cont2">
+      <h2 class="cont3">Panel de Usuario</h2>
+      <div class="cont4">
         <router-link
           to="/history"
-          class="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded"
+          class="verhist"
         >
           Ver historial
         </router-link>
         <button
           @click="resetForm"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          class="newoper"
         >
           Nueva operación
         </button>
       </div>
     </div>
 
-    <!-- Formulario -->
     <form
       @submit.prevent="submitForm"
-      class="space-y-4 bg-white shadow-md p-6 rounded-2xl"
+      class="cont7"
     >
       <div>
-        <label for="action" class="block font-semibold">Acción:</label>
+        <label for="action" class="accioncri">Acción:</label>
         <select
           v-model="action"
           id="action"
           required
-          class="w-full p-2 border rounded"
+          class="opcciones"
         >
           <option value="compra">Compra</option>
           <option value="venta">Venta</option>
@@ -37,12 +36,12 @@
       </div>
 
       <div>
-        <label for="crypto" class="block font-semibold">Criptomoneda:</label>
+        <label for="crypto" class="cryp">Criptomoneda:</label>
         <select
           v-model="crypto"
           id="crypto"
           required
-          class="w-full p-2 border rounded"
+          class="opcciones"
         >
           <option disabled value="">Selecciona una opción</option>
           <option value="btc">Bitcoin (BTC)</option>
@@ -52,7 +51,7 @@
       </div>
 
       <div>
-        <label for="amount" class="block font-semibold">Cantidad:</label>
+        <label for="amount" class="cantidad">Cantidad:</label>
         <input
           type="number"
           v-model.number="amount"
@@ -60,22 +59,23 @@
           required
           min="0.0001"
           step="any"
-          class="w-full p-2 border rounded"
+          class="cant1"
         />
       </div>
 
       <button
         type="submit"
-        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        class="confirma"
       >
         Confirmar
       </button>
 
-      <p v-if="message" class="text-green-600 mt-2">{{ message }}</p>
-      <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
+      <p v-if="message" class="aceptado">{{ message }}</p>
+      <p v-if="errorMessage" class="cancelado">{{ errorMessage }}</p>
     </form>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios'
@@ -148,67 +148,115 @@ export default {
 </script>
 
 <style scoped>
-/* Estilo del contenedor principal */
-.bg-white {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+.cont1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem;
-  border-radius: 0.75rem;
+  gap: 2rem;
 }
 
-/* Hover sobre el contenedor */
-.bg-white:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.cont2 {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
 }
 
-/* Estilos del formulario */
-form {
+.cont3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.cont4 {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.verhist {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.verhist:hover {
+  background-color: #059669;
+}
+
+.newoper {
+  background-color: #f59e0b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.newoper:hover {
+  background-color: #d97706;
+}
+
+.cont7 {
   background-color: white;
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
 }
 
-label {
+.accioncri,
+.cryp,
+.cantidad {
+  display: block;
   font-size: 1rem;
   color: #333;
+  margin-bottom: 0.25rem;
 }
 
-select,
-input {
+.opcciones,
+.cant1 {
   width: 100%;
   padding: 0.8rem;
   border-radius: 0.375rem;
   border: 1px solid #ddd;
-  margin-top: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-button {
+.confirma {
   width: 100%;
   padding: 0.8rem;
   background-color: #2563eb;
   color: white;
+  border: none;
   border-radius: 0.375rem;
   transition: background-color 0.3s ease;
+  cursor: pointer;
 }
 
-button:hover {
+.confirma:hover {
   background-color: #1e40af;
 }
 
-/* Mensajes de error y éxito */
-.text-green-600 {
+.aceptado {
+  margin-top: 1rem;
   color: #16a34a;
+  font-weight: 500;
 }
 
-.text-red-500 {
+.cancelado {
+  margin-top: 1rem;
   color: #ef4444;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
+  font-weight: 500;
 }
 </style>
