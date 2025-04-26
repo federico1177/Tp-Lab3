@@ -2,8 +2,8 @@
   <div class="cont1">
     <h2 class="titulo">Historial de movimientos</h2>
 
-    <div v-if="loading">Cargando...</div>
-    <div v-else-if="transactions.length === 0">No hay movimientos registrados.</div>
+    <div v-if="cargando">Cargando...</div>
+    <div v-else-if="movimientos.length === 0">No hay movimientos registrados.</div>
 
     <div v-else class="cont2">
       <table class="tablahist">
@@ -13,25 +13,25 @@
             <th class="dato">Cripto</th>
             <th class="dato">Cantidad</th>
             <th class="dato">Monto en ARS</th>
-            <th class="dato">Acciones</th> 
+            <th class="dato">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="tx in transactions" :key="tx._id">
-            <td class="dato">{{ formatDate(tx.datetime) }}</td>
-            <td class="dato">{{ tx.crypto_code }}</td>
-            <td class="dato">{{ tx.crypto_amount }}</td>
-            <td class="dato">{{ formatCurrency(tx.money) }}</td>
+          <tr v-for="mov in movimientos" :key="mov._id">
+            <td class="dato">{{ formatearFecha(mov.datetime) }}</td>
+            <td class="dato">{{ mov.crypto_code }}</td>
+            <td class="dato">{{ mov.crypto_amount }}</td>
+            <td class="dato">{{ formatearMoneda(mov.money) }}</td>
             <td class="dato">
-              <button @click="editTransaction(tx)" class="edit-btn">Editar</button>
-              <button @click="deleteTransaction(tx._id)" class="delete-btn">Eliminar</button>
-            </td> 
+              <button @click="editarMovimiento(mov)" class="edit-btn">Editar</button>
+              <button @click="eliminarMovimiento(mov._id)" class="delete-btn">Eliminar</button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <p v-if="errorMessage" class="meserror">{{ errorMessage }}</p>
+    <p v-if="mensajeError" class="meserror">{{ mensajeError }}</p>
   </div>
 </template>
 
@@ -40,84 +40,80 @@ import axios from 'axios'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'TransactionHistory',
+  name: 'HistorialMovimientos',
   data() {
     return {
-      transactions: [],
-      loading: true,
-      errorMessage: ''
+      movimientos: [],
+      cargando: true,
+      mensajeError: ''
     }
   },
   computed: {
     ...mapGetters(['getUserId'])
   },
   methods: {
-    async fetchTransactions() {
+    async obtenerMovimientos() {
       try {
         const { data } = await axios.get(
           `https://laboratorio3-f36a.restdb.io/rest/transactions?q={"user_id":"${this.getUserId}"}`,
           { headers: { 'x-apikey': '60eb09146661365596af552f' } }
         )
-        this.transactions = data
+        this.movimientos = data
       } catch (error) {
-        this.errorMessage = 'No se pudieron obtener los movimientos.'
+        this.mensajeError = 'No se pudieron obtener los movimientos.'
         console.error(error)
       } finally {
-        this.loading = false
+        this.cargando = false
       }
     },
-    formatDate(datetime) {
-      return new Date(datetime).toLocaleString()
+    formatearFecha(fechaHora) {
+      return new Date(fechaHora).toLocaleString()
     },
-    formatCurrency(value) {
+    formatearMoneda(valor) {
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: 'ARS'
-      }).format(value)
+      }).format(valor)
     },
-    
-    async editTransaction(tx) {
-      const newMoney = prompt('Ingrese el nuevo monto en ARS:', tx.money);
-      if (newMoney !== null && !isNaN(newMoney) && parseFloat(newMoney) > 0) {
+    async editarMovimiento(mov) {
+      const nuevoMonto = prompt('Ingrese el nuevo monto en ARS:', mov.money);
+      if (nuevoMonto !== null && !isNaN(nuevoMonto) && parseFloat(nuevoMonto) > 0) {
         try {
-          const updatedTx = { money: newMoney };
+          const movimientoActualizado = { money: nuevoMonto };
           await axios.patch(
-            `https://laboratorio3-f36a.restdb.io/rest/transactions/${tx._id}`,
-            updatedTx,
+            `https://laboratorio3-f36a.restdb.io/rest/transactions/${mov._id}`,
+            movimientoActualizado,
             { headers: { 'x-apikey': '60eb09146661365596af552f' } }
           )
-          
-          tx.money = newMoney;
-          alert('Transacción actualizada con éxito');
+          mov.money = nuevoMonto;
+          alert('Movimiento actualizado con éxito');
         } catch (error) {
-          this.errorMessage = 'Hubo un error al editar la transacción.'
+          this.mensajeError = 'Hubo un error al editar el movimiento.'
           console.error(error)
         }
       } else {
         alert('Monto inválido');
       }
     },
-    
-    async deleteTransaction(transactionId) {
-      const confirmDelete = confirm('¿Estás seguro de que deseas eliminar esta transacción?');
-      if (confirmDelete) {
+    async eliminarMovimiento(idMovimiento) {
+      const confirmarEliminacion = confirm('¿Estás seguro de que deseas eliminar este movimiento?');
+      if (confirmarEliminacion) {
         try {
           await axios.delete(
-            `https://laboratorio3-f36a.restdb.io/rest/transactions/${transactionId}`,
+            `https://laboratorio3-f36a.restdb.io/rest/transactions/${idMovimiento}`,
             { headers: { 'x-apikey': '60eb09146661365596af552f' } }
           )
-      
-          this.transactions = this.transactions.filter(tx => tx._id !== transactionId);
-          alert('Transacción eliminada correctamente.')
+          this.movimientos = this.movimientos.filter(mov => mov._id !== idMovimiento);
+          alert('Movimiento eliminado correctamente.')
         } catch (error) {
-          this.errorMessage = 'Hubo un error al eliminar la transacción.'
+          this.mensajeError = 'Hubo un error al eliminar el movimiento.'
           console.error(error)
         }
       }
     }
   },
   mounted() {
-    this.fetchTransactions()
+    this.obtenerMovimientos()
   }
 }
 </script>

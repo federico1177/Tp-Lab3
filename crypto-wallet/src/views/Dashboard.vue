@@ -4,22 +4,22 @@
       <h2 class="cont3">Panel de Usuario</h2>
       <div class="cont4">
         <router-link to="/history" class="verhist">Ver historial</router-link>
-        <button @click="resetForm" class="newoper">Nueva operación</button>
+        <button @click="reiniciarFormulario" class="newoper">Nueva operación</button>
       </div>
     </div>
 
-    <form @submit.prevent="submitForm" class="cont7">
+    <form @submit.prevent="enviarFormulario" class="cont7">
       <div>
-        <label for="action" class="accioncri">Acción:</label>
-        <select v-model="action" id="action" required class="opcciones">
+        <label for="accion" class="accioncri">Acción:</label>
+        <select v-model="accion" id="accion" required class="opcciones">
           <option value="purchase">Compra</option>
           <option value="sale">Venta</option>
         </select>
       </div>
 
       <div>
-        <label for="crypto" class="cryp">Criptomoneda:</label>
-        <select v-model="crypto" id="crypto" required class="opcciones" @change="updateCryptoPrice">
+        <label for="cripto" class="cryp">Criptomoneda:</label>
+        <select v-model="cripto" id="cripto" required class="opcciones" @change="actualizarPrecioCripto">
           <option disabled value="">Selecciona una opción</option>
           <option value="btc">Bitcoin (BTC)</option>
           <option value="eth">Ethereum (ETH)</option>
@@ -27,26 +27,26 @@
         </select>
       </div>
 
-      <div v-if="action === 'purchase'">
-        <label for="money" class="cantidad">Monto en ARS:</label>
+      <div v-if="accion === 'purchase'">
+        <label for="dinero" class="cantidad">Monto en ARS:</label>
         <input
           type="number"
-          v-model.number="money"
-          id="money"
+          v-model.number="dinero"
+          id="dinero"
           required
           min="0.01"
           step="any"
           class="cant1"
-          @input="calculateAmountFromMoney"
+          @input="calcularCantidadDesdeDinero"
         />
       </div>
 
-      <div v-if="action === 'purchase'">
-        <label for="amount" class="cantidad">Cantidad:</label>
+      <div v-if="accion === 'purchase'">
+        <label for="cantidad" class="cantidad">Cantidad:</label>
         <input
           type="number"
-          v-model.number="amount"
-          id="amount"
+          v-model.number="cantidad"
+          id="cantidad"
           required
           min="0.0001"
           step="any"
@@ -55,26 +55,26 @@
         />
       </div>
 
-      <div v-if="action === 'sale'">
-        <label for="cryptoAmount" class="cantidad">Cantidad de Cripto a Vender:</label>
+      <div v-if="accion === 'sale'">
+        <label for="cantidadCripto" class="cantidad">Cantidad de Cripto a Vender:</label>
         <input
           type="number"
-          v-model.number="amount"
-          id="cryptoAmount"
+          v-model.number="cantidad"
+          id="cantidadCripto"
           required
           min="0.0001"
           step="any"
           class="cant1"
-          @input="calculateMoneyFromAmount"
+          @input="calcularDineroDesdeCantidad"
         />
       </div>
 
-      <div v-if="action === 'sale'">
-        <label for="moneySale" class="cantidad">Monto en ARS que recibirás:</label>
+      <div v-if="accion === 'sale'">
+        <label for="dineroVenta" class="cantidad">Monto en ARS que recibirás:</label>
         <input
           type="number"
-          v-model.number="money"
-          id="moneySale"
+          v-model.number="dinero"
+          id="dineroVenta"
           required
           min="0.01"
           step="any"
@@ -84,11 +84,11 @@
       </div>
 
       <div>
-        <label for="datetime" class="cantidad">Fecha y Hora:</label>
+        <label for="fechaHora" class="cantidad">Fecha y Hora:</label>
         <input
           type="datetime-local"
-          v-model="datetime"
-          id="datetime"
+          v-model="fechaHora"
+          id="fechaHora"
           required
           class="cant1"
         />
@@ -96,9 +96,9 @@
 
       <button type="submit" class="confirma">Confirmar</button>
 
-      <p v-if="loading" class="procesando">Procesando transacción...</p>
-      <p v-if="message" class="aceptado">{{ message }}</p>
-      <p v-if="errorMessage" class="cancelado">{{ errorMessage }}</p>
+      <p v-if="cargando" class="procesando">Procesando transacción...</p>
+      <p v-if="mensaje" class="aceptado">{{ mensaje }}</p>
+      <p v-if="mensajeError" class="cancelado">{{ mensajeError }}</p>
     </form>
   </div>
 </template>
@@ -108,89 +108,89 @@ import axios from 'axios'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'UserDashboard',
+  name: 'PanelUsuario',
   data() {
     return {
-      action: 'purchase', 
-      crypto: '',
-      amount: null, 
-      money: null,   
-      price: null,   
-      datetime: '',  
-      message: '',
-      errorMessage: '',
-      loading: false
+      accion: 'purchase', 
+      cripto: '',
+      cantidad: null, 
+      dinero: null,   
+      precio: null,   
+      fechaHora: '',  
+      mensaje: '',
+      mensajeError: '',
+      cargando: false
     }
   },
   computed: {
     ...mapGetters(['getUserId'])
   },
   methods: {
-    async updateCryptoPrice() {
-      if (!this.crypto) return;
+    async actualizarPrecioCripto() {
+      if (!this.cripto) return;
 
       try {
-        const { data: priceData } = await axios.get(
-          `https://criptoya.com/api/satoshitango/${this.crypto}/ars`
+        const { data: datosPrecio } = await axios.get(
+          `https://criptoya.com/api/satoshitango/${this.cripto}/ars`
         );
-        this.price = this.action === 'purchase' ? priceData.totalAsk : priceData.totalBid;
-        this.calculateAmountFromMoney(); 
+        this.precio = this.accion === 'purchase' ? datosPrecio.totalAsk : datosPrecio.totalBid;
+        this.calcularCantidadDesdeDinero(); 
       } catch (error) {
         console.error(error);
-        this.price = null;
+        this.precio = null;
       }
     },
 
-    calculateAmountFromMoney() {
-      if (this.price && this.money > 0 && this.action === 'purchase') {
-        this.amount = this.money / this.price;
+    calcularCantidadDesdeDinero() {
+      if (this.precio && this.dinero > 0 && this.accion === 'purchase') {
+        this.cantidad = this.dinero / this.precio;
       } else {
-        this.amount = null;
+        this.cantidad = null;
       }
     },
 
-    calculateMoneyFromAmount() {
-      if (this.price && this.amount > 0 && this.action === 'sale') {
-        this.money = this.amount * this.price;
+    calcularDineroDesdeCantidad() {
+      if (this.precio && this.cantidad > 0 && this.accion === 'sale') {
+        this.dinero = this.cantidad * this.precio;
       } else {
-        this.money = null;
+        this.dinero = null;
       }
     },
 
-    async submitForm() {
-      this.message = '';
-      this.errorMessage = '';
-      this.loading = true;
+    async enviarFormulario() {
+      this.mensaje = '';
+      this.mensajeError = '';
+      this.cargando = true;
 
-      if (!this.crypto || !this.amount || !this.money || !this.datetime) {
-        this.errorMessage = 'Todos los campos son obligatorios y deben ser válidos.';
-        this.loading = false;
+      if (!this.cripto || !this.cantidad || !this.dinero || !this.fechaHora) {
+        this.mensajeError = 'Todos los campos son obligatorios y deben ser válidos.';
+        this.cargando = false;
         return;
       }
 
-      const dateObj = new Date(this.datetime);
+      const fechaObjeto = new Date(this.fechaHora);
 
-      if (isNaN(dateObj.getTime())) {
-        this.errorMessage = 'Fecha inválida.';
-        this.loading = false;
+      if (isNaN(fechaObjeto.getTime())) {
+        this.mensajeError = 'Fecha inválida.';
+        this.cargando = false;
         return;
       }
 
-      const formattedDatetime = dateObj.toISOString();
+      const fechaHoraFormateada = fechaObjeto.toISOString();
 
-      const transactionData = {
+      const datosTransaccion = {
         user_id: this.getUserId,
-        action: this.action,
-        crypto_code: this.crypto,
-        crypto_amount: this.amount,
-        money: this.money,
-        datetime: formattedDatetime
+        action: this.accion,
+        crypto_code: this.cripto,
+        crypto_amount: this.cantidad,
+        money: this.dinero,
+        datetime: fechaHoraFormateada
       };
 
       try {
         await axios.post(
           'https://laboratorio3-f36a.restdb.io/rest/transactions',
-          transactionData,
+          datosTransaccion,
           {
             headers: {
               'x-apikey': '60eb09146661365596af552f',
@@ -199,26 +199,27 @@ export default {
           }
         );
 
-        this.message = 'Operación registrada con éxito.';
-        this.resetForm();
+        this.mensaje = 'Operación registrada con éxito.';
+        this.reiniciarFormulario();
       } catch (error) {
         console.error(error);
-        this.errorMessage = 'Hubo un error al registrar la operación.';
+        this.mensajeError = 'Hubo un error al registrar la operación.';
       } finally {
-        this.loading = false;
+        this.cargando = false;
       }
     },
 
-    resetForm() {
-      this.action = 'purchase';
-      this.crypto = '';
-      this.amount = null;
-      this.money = null;
-      this.datetime = '';
+    reiniciarFormulario() {
+      this.accion = 'purchase';
+      this.cripto = '';
+      this.cantidad = null;
+      this.dinero = null;
+      this.fechaHora = '';
     }
   }
 }
 </script>
+
 
 <style scoped>
 .cont1 {

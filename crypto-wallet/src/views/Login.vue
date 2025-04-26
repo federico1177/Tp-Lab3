@@ -4,16 +4,16 @@
       <h1 class="btinicio">Iniciar Sesión</h1>
 
       <input
-        v-model="userId"
+        v-model="idUsuario"
         type="text"
         placeholder="Ingresa tu ID"
         class="usuario"
       />
 
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+      <p v-if="mensajeError" class="error">{{ mensajeError }}</p>
 
       <button
-        @click="login"
+        @click="iniciarSesion"
         class="btiniciar"
       >
         Entrar
@@ -28,40 +28,41 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
 export default {
-  name: 'UserLogin',
+  name: 'IniciarSesion',
   setup() {
     const store = useStore()
     const router = useRouter()
-    const userId = ref('')
-    const errorMessage = ref('')
+    const idUsuario = ref('')  // Reemplazamos userId por idUsuario
+    const mensajeError = ref('')  // Reemplazamos errorMessage por mensajeError
 
-    const login = () => {
-      errorMessage.value = ''
+    const iniciarSesion = () => {
+      mensajeError.value = ''  // Limpiamos el mensaje de error
 
-      if (!userId.value.trim()) {
-        errorMessage.value = 'Por favor, ingresá un ID válido.'
+      if (!idUsuario.value.trim()) {
+        mensajeError.value = 'Por favor, ingresá un ID válido.'
         return
       }
 
-      const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/
+      const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/  // Verificamos que el ID tenga letra y número
 
-      if (!regex.test(userId.value)) {
-        errorMessage.value = 'El ID debe contener al menos una letra y un número.'
+      if (!regex.test(idUsuario.value)) {
+        mensajeError.value = 'El ID debe contener al menos una letra y un número.'
         return
       }
 
-      store.commit('setUserId', userId.value)
-      router.push('/dashboard')
+      store.commit('setUserId', idUsuario.value)  // Establecemos el ID de usuario en el estado global
+      router.push('/dashboard')  // Redirigimos al dashboard
     }
 
     return {
-      userId,
-      errorMessage,
-      login
+      idUsuario,
+      mensajeError,
+      iniciarSesion
     }
   }
 }
 </script>
+
 
 <style scoped>
 .cont1 {

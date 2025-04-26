@@ -1,10 +1,10 @@
 <template>
-  <div class="finances-container">
+  <div class="cont1">
     <h2 class="title">Análisis del Estado Actual</h2>
 
-    <div v-if="loading" class="loading">Cargando datos...</div>
-    <div v-else-if="errorMessage" class="error">{{ errorMessage }}</div>
-    <div v-else-if="finances.length === 0" class="no-data">No tenés criptomonedas registradas todavía.</div>
+    <div v-if="cargando" class="carga">Cargando datos...</div>
+    <div v-else-if="mensajeError" class="error">{{ mensajeError }}</div>
+    <div v-else-if="finanzas.length === 0" class="no-data">No tenés criptomonedas registradas todavía.</div>
 
     <table v-else>
       <thead>
@@ -15,17 +15,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(crypto, index) in finances" :key="index">
-          <td>{{ crypto.crypto_code.toUpperCase() }}</td>
-          <td>{{ crypto.amount.toFixed(6) }}</td> 
-          <td>${{ crypto.valueInARS.toLocaleString() }}</td>
+        <tr v-for="(cripto, indice) in finanzas" :key="indice">
+          <td>{{ cripto.crypto_code.toUpperCase() }}</td>
+          <td>{{ cripto.amount.toFixed(6) }}</td> 
+          <td>${{ cripto.valueInARS.toLocaleString() }}</td>
         </tr>
       </tbody>
     </table>
 
-    <div v-if="totalMoney > 0" class="total">
+    <div v-if="dineroTotal > 0" class="total">
       <h3>Total en ARS:</h3>
-      <p>${{ totalMoney.toLocaleString() }}</p>
+      <p>${{ dineroTotal.toLocaleString() }}</p>
     </div>
   </div>
 </template>
@@ -34,27 +34,27 @@
 import axios from "axios";
 
 export default {
-  name: "FinancesView",
+  name: "VistaFinanzas",
   data() {
     return {
-      loading: true,
-      errorMessage: "",
-      finances: [],
-      totalMoney: 0,
+      cargando: true,
+      mensajeError: "",
+      finanzas: [],
+      dineroTotal: 0,
     };
   },
   methods: {
-    async fetchTransactions() {
+    async obtenerTransacciones() {
       try {
-        const userId = this.$store.state.userId;
-        if (!userId) {
-          this.errorMessage = "El usuario no está autenticado.";
-          this.loading = false;
+        const usuarioId = this.$store.state.userId;
+        if (!usuarioId) {
+          this.mensajeError = "El usuario no está autenticado.";
+          this.cargando = false;
           return;
         }
 
-        const response = await axios.get(
-          `https://laboratorio3-f36a.restdb.io/rest/transactions?q={"user_id":"${userId}"}`,
+        const respuesta = await axios.get(
+          `https://laboratorio3-f36a.restdb.io/rest/transactions?q={"user_id":"${usuarioId}"}`,
           {
             headers: {
               "x-apikey": "60eb09146661365596af552f",
@@ -63,87 +63,86 @@ export default {
           }
         );
 
-        const transactions = response.data;
+        const transacciones = respuesta.data;
 
-        if (transactions.length === 0) {
-          this.loading = false;
+        if (transacciones.length === 0) {
+          this.cargando = false;
           return;
         }
 
-        let cryptos = {};
+        let criptomonedas = {};
 
-        transactions.forEach((transaction) => {
-          const { crypto_code, crypto_amount, action } = transaction;
-          if (!cryptos[crypto_code]) {
-            cryptos[crypto_code] = { amount: 0, crypto_code };
+        transacciones.forEach((transaccion) => {
+          const { crypto_code, crypto_amount, action } = transaccion;
+          if (!criptomonedas[crypto_code]) {
+            criptomonedas[crypto_code] = { amount: 0, crypto_code };
           }
 
           if (action === "purchase") {
-            cryptos[crypto_code].amount += parseFloat(crypto_amount);
+            criptomonedas[crypto_code].amount += parseFloat(crypto_amount);
           } else if (action === "sale") {
-            cryptos[crypto_code].amount -= parseFloat(crypto_amount);
+            criptomonedas[crypto_code].amount -= parseFloat(crypto_amount);
           }
         });
 
-        // Filtramos criptos que tengan cantidad > 0
-        Object.keys(cryptos).forEach((key) => {
-          if (cryptos[key].amount <= 0) {
-            delete cryptos[key];
+        Object.keys(criptomonedas).forEach((key) => {
+          if (criptomonedas[key].amount <= 0) {
+            delete criptomonedas[key];
           }
         });
 
-        await this.fetchCryptoPrices(cryptos);
+        await this.obtenerPreciosCripto(criptomonedas);
 
       } catch (error) {
-        this.errorMessage = "Hubo un error al cargar las transacciones.";
+        this.mensajeError = "Hubo un error al cargar las transacciones.";
         console.error(error);
       } finally {
-        this.loading = false;
+        this.cargando = false;
       }
     },
 
-    async fetchCryptoPrices(cryptos) {
+    async obtenerPreciosCripto(criptomonedas) {
       try {
-        const cryptoCodes = Object.keys(cryptos);
+        const codigosCripto = Object.keys(criptomonedas);
 
-        const prices = await Promise.all(
-          cryptoCodes.map((code) =>
-            axios.get(`https://criptoya.com/api/satoshitango/${code}/ars`)
+        const precios = await Promise.all(
+          codigosCripto.map((codigo) =>
+            axios.get(`https://criptoya.com/api/satoshitango/${codigo}/ars`)
           )
         );
 
-        prices.forEach((priceResponse, index) => {
-          const cryptoCode = cryptoCodes[index];
-          const price = priceResponse.data.totalBid;
-          if (price && cryptos[cryptoCode].amount > 0) {
-            const valueInARS = price * cryptos[cryptoCode].amount;
-            cryptos[cryptoCode].valueInARS = valueInARS;
+        precios.forEach((respuestaPrecio, indice) => {
+          const codigoCripto = codigosCripto[indice];
+          const precio = respuestaPrecio.data.totalBid;
+          if (precio && criptomonedas[codigoCripto].amount > 0) {
+            const valorEnARS = precio * criptomonedas[codigoCripto].amount;
+            criptomonedas[codigoCripto].valueInARS = valorEnARS;
           }
         });
 
-        this.finances = Object.values(cryptos);
-        this.calculateTotal();
+        this.finanzas = Object.values(criptomonedas);
+        this.calcularTotal();
 
       } catch (error) {
-        this.errorMessage = "Hubo un error al obtener los precios de las criptomonedas.";
+        this.mensajeError = "Hubo un error al obtener los precios de las criptomonedas.";
         console.error(error);
       }
     },
 
-    calculateTotal() {
-      this.totalMoney = this.finances.reduce((total, crypto) => {
-        return total + (crypto.valueInARS || 0);
+    calcularTotal() {
+      this.dineroTotal = this.finanzas.reduce((total, cripto) => {
+        return total + (cripto.valueInARS || 0);
       }, 0);
     },
   },
   created() {
-    this.fetchTransactions();
+    this.obtenerTransacciones();
   },
 };
 </script>
 
 <style scoped>
-.finances-container {
+.con1{
   padding: 2rem;
   text-align: center;
 }
@@ -170,14 +169,14 @@ table th {
   font-weight: bold;
 }
 
-.loading,
+.carga,
 .error,
 .no-data {
   font-size: 1.2rem;
   margin-top: 2rem;
 }
 
-.loading {
+.carga {
   color: #007bff;
 }
 
