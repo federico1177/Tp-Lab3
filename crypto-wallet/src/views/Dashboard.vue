@@ -27,7 +27,7 @@
         </select>
       </div>
 
-      <div>
+      <div v-if="action === 'purchase'">
         <label for="amount" class="cantidad">Cantidad:</label>
         <input
           type="number"
@@ -41,7 +41,7 @@
         />
       </div>
 
-      <div>
+      <div v-if="action === 'purchase'">
         <label for="money" class="cantidad">Monto en ARS:</label>
         <input
           type="number"
@@ -52,6 +52,34 @@
           step="any"
           class="cant1"
           @input="calculateAmountFromMoney"
+        />
+      </div>
+
+      <div v-if="action === 'sale'">
+        <label for="cryptoAmount" class="cantidad">Cantidad de Cripto a Vender:</label>
+        <input
+          type="number"
+          v-model.number="amount"
+          id="cryptoAmount"
+          required
+          min="0.0001"
+          step="any"
+          class="cant1"
+          @input="calculateMoneyFromAmount"
+        />
+      </div>
+
+      <div v-if="action === 'sale'">
+        <label for="moneySale" class="cantidad">Monto en ARS que recibirás:</label>
+        <input
+          type="number"
+          v-model.number="money"
+          id="moneySale"
+          required
+          min="0.01"
+          step="any"
+          class="cant1"
+          :disabled="true"
         />
       </div>
 
@@ -114,10 +142,18 @@ export default {
     },
 
     calculateAmountFromMoney() {
-      if (this.price && this.money > 0) {
+      if (this.price && this.money > 0 && this.action === 'purchase') {
         this.amount = this.money / this.price;
       } else {
         this.amount = null;
+      }
+    },
+
+    calculateMoneyFromAmount() {
+      if (this.price && this.amount > 0 && this.action === 'sale') {
+        this.money = this.amount * this.price;
+      } else {
+        this.money = null;
       }
     },
 
@@ -126,14 +162,12 @@ export default {
       this.errorMessage = ''
       this.loading = true
 
-      
       if (!this.crypto || !this.amount || !this.money || !this.datetime) {
         this.errorMessage = 'Todos los campos son obligatorios y deben ser validos.'
         this.loading = false
         return
       }
 
-    
       const formattedDatetime = new Date(this.datetime).toLocaleString('en-GB', {
         timeZone: 'UTC'
       }).replace(',', '').replace('/', '-').replace('/', '-');

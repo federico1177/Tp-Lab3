@@ -4,6 +4,7 @@
     <div class="botons">
       <router-link to="/dashboard" class="boton">Dashboard</router-link>
       <router-link to="/history" class="boton">Historial</router-link>
+      <router-link to="/Estado" class="boton">Estado</router-link>
       <router-link to="/" class="boton">Cerrar sesión</router-link>
     </div>
   </nav>
