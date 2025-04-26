@@ -28,20 +28,6 @@
       </div>
 
       <div v-if="action === 'purchase'">
-        <label for="amount" class="cantidad">Cantidad:</label>
-        <input
-          type="number"
-          v-model.number="amount"
-          id="amount"
-          required
-          min="0.0001"
-          step="any"
-          class="cant1"
-          :disabled="true"
-        />
-      </div>
-
-      <div v-if="action === 'purchase'">
         <label for="money" class="cantidad">Monto en ARS:</label>
         <input
           type="number"
@@ -52,6 +38,20 @@
           step="any"
           class="cant1"
           @input="calculateAmountFromMoney"
+        />
+      </div>
+
+      <div v-if="action === 'purchase'">
+        <label for="amount" class="cantidad">Cantidad:</label>
+        <input
+          type="number"
+          v-model.number="amount"
+          id="amount"
+          required
+          min="0.0001"
+          step="any"
+          class="cant1"
+          :disabled="true"
         />
       </div>
 
@@ -158,28 +158,34 @@ export default {
     },
 
     async submitForm() {
-      this.message = ''
-      this.errorMessage = ''
-      this.loading = true
+      this.message = '';
+      this.errorMessage = '';
+      this.loading = true;
 
       if (!this.crypto || !this.amount || !this.money || !this.datetime) {
-        this.errorMessage = 'Todos los campos son obligatorios y deben ser validos.'
-        this.loading = false
-        return
+        this.errorMessage = 'Todos los campos son obligatorios y deben ser válidos.';
+        this.loading = false;
+        return;
       }
 
-      const formattedDatetime = new Date(this.datetime).toLocaleString('en-GB', {
-        timeZone: 'UTC'
-      }).replace(',', '').replace('/', '-').replace('/', '-');
+      const dateObj = new Date(this.datetime);
+
+      if (isNaN(dateObj.getTime())) {
+        this.errorMessage = 'Fecha inválida.';
+        this.loading = false;
+        return;
+      }
+
+      const formattedDatetime = dateObj.toISOString();
 
       const transactionData = {
-        user_id: this.getUserId,  
+        user_id: this.getUserId,
         action: this.action,
         crypto_code: this.crypto,
         crypto_amount: this.amount,
         money: this.money,
         datetime: formattedDatetime
-      }
+      };
 
       try {
         await axios.post(
@@ -191,30 +197,28 @@ export default {
               'Content-Type': 'application/json'
             }
           }
-        )
+        );
 
-        this.message = 'Operación registrada con éxito.'
-        this.resetForm()
+        this.message = 'Operación registrada con éxito.';
+        this.resetForm();
       } catch (error) {
-        console.error(error)
-        this.errorMessage = 'Hubo un error al registrar la operación.'
+        console.error(error);
+        this.errorMessage = 'Hubo un error al registrar la operación.';
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
     resetForm() {
-      this.action = 'purchase'
-      this.crypto = ''
-      this.amount = null
-      this.money = null
-      this.datetime = ''
+      this.action = 'purchase';
+      this.crypto = '';
+      this.amount = null;
+      this.money = null;
+      this.datetime = '';
     }
   }
 }
 </script>
-
-
 
 <style scoped>
 .cont1 {
@@ -332,13 +336,6 @@ export default {
 .procesando {
   margin-top: 1rem;
   color: #3b82f6;
-  font-weight: 500;
-}
-
-.total-ars {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #4ade80; 
   font-weight: 500;
 }
 </style>
