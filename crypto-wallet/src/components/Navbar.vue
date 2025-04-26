@@ -1,6 +1,6 @@
 <template>
   <nav class="cont1">
-    <div class="logo">CryptoPanel</div>
+    <div class="logo">CryptoWallet</div>
     <div class="botons">
       <router-link to="/dashboard" class="boton">Dashboard</router-link>
       <router-link to="/history" class="boton">Historial</router-link>
