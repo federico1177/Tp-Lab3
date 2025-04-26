@@ -3,33 +3,15 @@
     <div class="cont2">
       <h2 class="cont3">Panel de Usuario</h2>
       <div class="cont4">
-        <router-link
-          to="/history"
-          class="verhist"
-        >
-          Ver historial
-        </router-link>
-        <button
-          @click="resetForm"
-          class="newoper"
-        >
-          Nueva operación
-        </button>
+        <router-link to="/history" class="verhist">Ver historial</router-link>
+        <button @click="resetForm" class="newoper">Nueva operación</button>
       </div>
     </div>
 
-    <form
-      @submit.prevent="submitForm"
-      class="cont7"
-    >
+    <form @submit.prevent="submitForm" class="cont7">
       <div>
         <label for="action" class="accioncri">Acción:</label>
-        <select
-          v-model="action"
-          id="action"
-          required
-          class="opcciones"
-        >
+        <select v-model="action" id="action" required class="opcciones">
           <option value="compra">Compra</option>
           <option value="venta">Venta</option>
         </select>
@@ -37,12 +19,7 @@
 
       <div>
         <label for="crypto" class="cryp">Criptomoneda:</label>
-        <select
-          v-model="crypto"
-          id="crypto"
-          required
-          class="opcciones"
-        >
+        <select v-model="crypto" id="crypto" required class="opcciones">
           <option disabled value="">Selecciona una opción</option>
           <option value="btc">Bitcoin (BTC)</option>
           <option value="eth">Ethereum (ETH)</option>
@@ -63,13 +40,9 @@
         />
       </div>
 
-      <button
-        type="submit"
-        class="confirma"
-      >
-        Confirmar
-      </button>
+      <button type="submit" class="confirma">Confirmar</button>
 
+      <p v-if="loading" class="procesando">Procesando transacción...</p>
       <p v-if="message" class="aceptado">{{ message }}</p>
       <p v-if="errorMessage" class="cancelado">{{ errorMessage }}</p>
     </form>
@@ -88,30 +61,34 @@ export default {
       crypto: '',
       amount: null,
       message: '',
-      errorMessage: ''
+      errorMessage: '',
+      loading: false
     }
   },
   computed: {
-    ...mapGetters(['getUserId'])
+    ...mapGetters(['getUserId']) // OJO: getUserId es una propiedad computada
   },
   methods: {
     async submitForm() {
       this.message = ''
       this.errorMessage = ''
+      this.loading = true
 
       if (!this.crypto || !this.amount) {
         this.errorMessage = 'Todos los campos son obligatorios.'
+        this.loading = false
         return
       }
 
       try {
-        
-        const { data: priceData } = await axios.get(`https://criptoya.com/api/satoshitango/${this.crypto}/ars`)
+        const { data: priceData } = await axios.get(
+          `https://criptoya.com/api/satoshitango/${this.crypto}/ars`
+        )
         const rate = this.action === 'compra' ? priceData.totalAsk : priceData.totalBid
         const totalEnArs = this.amount * rate
 
-        const data = {
-          user_id: this.getUserId,
+        const transactionData = {
+          user_id: this.getUserId,  // ← CORREGIDO: sin paréntesis
           action: this.action,
           crypto_code: this.crypto,
           crypto_amount: this.amount,
@@ -121,7 +98,7 @@ export default {
 
         await axios.post(
           'https://laboratorio3-f36a.restdb.io/rest/transactions',
-          data,
+          transactionData,
           {
             headers: {
               'x-apikey': '60eb09146661365596af552f',
@@ -135,6 +112,8 @@ export default {
       } catch (error) {
         console.error(error)
         this.errorMessage = 'Hubo un error al registrar la operación.'
+      } finally {
+        this.loading = false
       }
     },
     resetForm() {
@@ -256,6 +235,12 @@ export default {
 .cancelado {
   margin-top: 1rem;
   color: #ef4444;
+  font-weight: 500;
+}
+
+.procesando {
+  margin-top: 1rem;
+  color: #3b82f6;
   font-weight: 500;
 }
 </style>

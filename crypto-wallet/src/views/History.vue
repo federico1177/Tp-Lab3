@@ -14,6 +14,7 @@
             <th class="dato">Cripto</th>
             <th class="dato">Cantidad</th>
             <th class="dato">Monto en ARS</th>
+            <th class="dato">Acciones</th> <!-- Nueva columna -->
           </tr>
         </thead>
         <tbody>
@@ -23,6 +24,11 @@
             <td class="dato">{{ tx.crypto_code }}</td>
             <td class="dato">{{ tx.crypto_amount }}</td>
             <td class="dato">{{ formatCurrency(tx.money) }}</td>
+            <td class="dato">
+              <!-- Solo Botones de Editar y Eliminar -->
+              <button @click="editTransaction(tx)" class="edit-btn">Editar</button>
+              <button @click="deleteTransaction(tx._id)" class="delete-btn">Eliminar</button>
+            </td> <!-- Botones Editar y Eliminar -->
           </tr>
         </tbody>
       </table>
@@ -31,7 +37,6 @@
     <p v-if="errorMessage" class="meserror">{{ errorMessage }}</p>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios'
@@ -72,6 +77,46 @@ export default {
         style: 'currency',
         currency: 'ARS'
       }).format(value)
+    },
+    // Editar una transacción
+    async editTransaction(tx) {
+      const newMoney = prompt('Ingrese el nuevo monto en ARS:', tx.money);
+      if (newMoney !== null && !isNaN(newMoney) && parseFloat(newMoney) > 0) {
+        try {
+          const updatedTx = { money: newMoney };
+          await axios.patch(
+            `https://laboratorio3-f36a.restdb.io/rest/transactions/${tx._id}`,
+            updatedTx,
+            { headers: { 'x-apikey': '60eb09146661365596af552f' } }
+          )
+          // Actualizar la transacción localmente
+          tx.money = newMoney;
+          alert('Transacción actualizada con éxito');
+        } catch (error) {
+          this.errorMessage = 'Hubo un error al editar la transacción.'
+          console.error(error)
+        }
+      } else {
+        alert('Monto inválido');
+      }
+    },
+    // Eliminar una transacción
+    async deleteTransaction(transactionId) {
+      const confirmDelete = confirm('¿Estás seguro de que deseas eliminar esta transacción?');
+      if (confirmDelete) {
+        try {
+          await axios.delete(
+            `https://laboratorio3-f36a.restdb.io/rest/transactions/${transactionId}`,
+            { headers: { 'x-apikey': '60eb09146661365596af552f' } }
+          )
+          // Eliminar la transacción localmente
+          this.transactions = this.transactions.filter(tx => tx._id !== transactionId);
+          alert('Transacción eliminada correctamente.')
+        } catch (error) {
+          this.errorMessage = 'Hubo un error al eliminar la transacción.'
+          console.error(error)
+        }
+      }
     }
   },
   mounted() {
@@ -117,5 +162,33 @@ export default {
   color: #EF4444;
   text-align: center;
   margin-top: 1rem;
+}
+
+/* Botones de Editar y Eliminar */
+.edit-btn {
+  background-color: #f59e0b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+  background-color: #d97706;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 1rem;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
 }
 </style>

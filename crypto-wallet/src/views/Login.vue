@@ -2,12 +2,16 @@
   <div class="cont1">
     <div class="cont2">
       <h1 class="btinicio">Iniciar Sesión</h1>
+
       <input
         v-model="userId"
         type="text"
         placeholder="Ingresa tu ID"
         class="usuario"
       />
+
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+
       <button
         @click="login"
         class="btiniciar"
@@ -17,7 +21,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import { ref } from 'vue'
@@ -30,19 +33,21 @@ export default {
     const store = useStore()
     const router = useRouter()
     const userId = ref('')
+    const errorMessage = ref('')
 
     const login = () => {
+      errorMessage.value = ''
+
       if (!userId.value.trim()) {
-        alert('Por favor, ingresá un ID válido.')
+        errorMessage.value = 'Por favor, ingresá un ID válido.'
         return
       }
 
-       const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/;
+      const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/
 
-        if (!regex.test(this.username)) {
-          
-        this.errorMessage = "El ID debe contener al menos una letra y un número.";
-        return;
+      if (!regex.test(userId.value)) {
+        errorMessage.value = 'El ID debe contener al menos una letra y un número.'
+        return
       }
 
       store.commit('setUserId', userId.value)
@@ -51,6 +56,7 @@ export default {
 
     return {
       userId,
+      errorMessage,
       login
     }
   }
@@ -91,6 +97,12 @@ export default {
   font-size: 1rem;
 }
 
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .btiniciar {
   padding: 0.75rem;
   background-color: #2563eb;
@@ -106,3 +118,4 @@ export default {
   background-color: #1e40af;
 }
 </style>
+
